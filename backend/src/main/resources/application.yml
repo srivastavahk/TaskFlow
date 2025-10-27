@@ -21,7 +21,7 @@ spring:
     show-sql: true # Good for debugging in 'dev'
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect
+        # dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true # Pretty-print SQL logs
 
   # Flyway Database Migrations

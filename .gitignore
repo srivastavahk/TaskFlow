@@ -1,2 +1,62 @@
 gitignore
-.env
+
+# Ignore any file with 'secret' or 'secrets' in its name (case-insensitive)
+**/*[Ss]ecret*
+**/*[Ss]ecrets*
+
+# Common secret/config file patterns
+**/.env*
+!**/.env.example        # Keep the example file in Git
+!**/.env.template       # Keep templates for reference
+
+# From backend/.gitignore
+*.class
+*.jar
+*.war
+*.ear
+backend/target/
+backend/.mvn/
+backend/pom.xml.tag
+backend/pom.xml.releaseBackup
+backend/pom.xml.versionsBackup
+backend/pom.xml.next
+backend/release.properties
+backend/dependency-reduced-pom.xml
+backend/buildNumber.properties
+backend/.mvn/timing.properties
+backend/.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+build/
+bin/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Secrets (PRD Sec 6.2)
+backend/src/main/resources/application-*.yml
+!backend/src/main/resources/application.yml
+!backend/src/main/resources/application-dev.yml.example
+
+
+# Frontend
+frontend/node_modules/
+frontend/build/
+frontend/.npm
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.pnp
+frontend/.pnp.js

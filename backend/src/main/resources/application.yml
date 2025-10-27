@@ -1,0 +1,30 @@
+#Base Spring Boot Configuration
+server:
+  port: 8080
+
+# Springdoc OpenAPI/Swagger Config
+springdoc:
+  api-docs:
+    path: /api/v1/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+spring:
+  # Profiles help separate configs (e.g., 'dev', 'prod')
+  profiles:
+    active: dev # Default to 'dev' profile
+
+  # JPA/Hibernate Configuration
+  jpa:
+    hibernate:
+      ddl-auto: none # We use Flyway for schema management, not hibernate
+    show-sql: true # Good for debugging in 'dev'
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true # Pretty-print SQL logs
+
+  # Flyway Database Migrations
+  flyway:
+    enabled: true
+    baseline-on-migrate: true # Will create schema history table automatically

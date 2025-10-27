@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  taskflow-db:
+    image: mysql:8.0
+    container_name: taskflow-db
+    ports:
+      - "3306:3306"
+    env_file:
+      - .env
+    environment:
+      MYSQL_DATABASE: taskflow_db
+      MYSQL_USER: taskflow_user
+    volumes:
+      - taskflow-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  taskflow-db-data:

@@ -4,6 +4,7 @@ import com.taskflow.dto.RegisterRequest;
 import com.taskflow.dto.UserDto;
 import com.taskflow.entity.User;
 import com.taskflow.entity.UserStatus;
+import com.taskflow.exception.DuplicateResourceException;
 import com.taskflow.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,7 +33,9 @@ public class AuthService {
         // 1. Check if email already exists
         if (userRepository.existsByEmail(request.getEmail())) {
             // We will replace this with a custom exception in the next step
-            throw new RuntimeException("Error: Email is already in use!");
+            throw new DuplicateResourceException(
+                "Email is already in use: " + request.getEmail()
+            );
         }
 
         // 2. Create new user entity

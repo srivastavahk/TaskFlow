@@ -63,16 +63,21 @@ public class TeamService {
      */
     @Transactional(readOnly = true)
     public List<TeamDto> getTeamsForUser(User user) {
-        // 1. Find all team memberships for the user
-        List<UserTeam> memberships = userTeamRepository.findByUserId(
-            user.getId()
-        );
+        // // 1. Find all team memberships for the user
+        // List<UserTeam> memberships = userTeamRepository.findByUserId(
+        //     user.getId()
+        // );
 
-        // 2. Map the results to TeamDto
-        return memberships
+        // // 2. Map the results to TeamDto
+        // return memberships
+        //     .stream()
+        //     .map(UserTeam::getTeam)
+        //     .map(this::mapTeamToDto)
+        //     .collect(Collectors.toList());
+        return userTeamRepository
+            .findByUserId(user.getId())
             .stream()
-            .map(UserTeam::getTeam)
-            .map(this::mapTeamToDto)
+            .map(membership -> mapTeamToDto(membership.getTeam())) // Use the team from the membership
             .collect(Collectors.toList());
     }
 

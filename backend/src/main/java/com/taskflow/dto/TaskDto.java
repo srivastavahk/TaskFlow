@@ -26,5 +26,6 @@ public class TaskDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Set<UserDto> assignees;
-    // We will add commentsCount, attachments, and tags later
+    private int commentsCount;
+    // We will add attachments, and tags later
 }

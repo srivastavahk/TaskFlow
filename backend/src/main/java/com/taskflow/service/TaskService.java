@@ -9,6 +9,7 @@ import com.taskflow.entity.Team;
 import com.taskflow.entity.User;
 import com.taskflow.exception.AccessDeniedException;
 import com.taskflow.exception.ResourceNotFoundException;
+import com.taskflow.repository.CommentRepository;
 import com.taskflow.repository.TaskRepository;
 import com.taskflow.repository.TeamRepository;
 import com.taskflow.repository.UserRepository;
@@ -29,6 +30,7 @@ public class TaskService {
     private final TeamRepository teamRepository;
     private final UserRepository userRepository;
     private final UserTeamRepository userTeamRepository;
+    private final CommentRepository commentRepository;
 
     /**
      * Creates a new task.
@@ -199,7 +201,13 @@ public class TaskService {
         }
     }
 
-    private TaskDto mapTaskToDto(Task task) {
+    public TaskDto mapTaskToDto(Task task) {
+        // This is an N+1 query. A more optimized solution would use
+        // a JPA projection or @Formula. For MVP, this is acceptable.
+        int commentsCount = commentRepository
+            .findByTaskIdOrderByCreatedAtAsc(task.getId())
+            .size();
+
         return TaskDto.builder()
             .taskId(task.getId())
             .teamId(task.getTeam().getId())
@@ -218,10 +226,11 @@ public class TaskService {
                     .map(this::mapUserToDto)
                     .collect(Collectors.toSet())
             )
+            .commentsCount(commentsCount)
             .build();
     }
 
-    private UserDto mapUserToDto(User user) {
+    public UserDto mapUserToDto(User user) {
         return UserDto.builder()
             .userId(user.getId())
             .name(user.getName())

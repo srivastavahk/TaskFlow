@@ -1,9 +1,12 @@
 package com.taskflow.controller;
 
+import com.taskflow.dto.CommentDto;
+import com.taskflow.dto.CreateCommentRequest;
 import com.taskflow.dto.CreateTaskRequest;
 import com.taskflow.dto.TaskDto;
 import com.taskflow.dto.UpdateTaskRequest;
 import com.taskflow.entity.User;
+import com.taskflow.service.CommentService;
 import com.taskflow.service.TaskService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -22,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 public class TaskController {
 
     private final TaskService taskService;
+    private final CommentService commentService;
 
     /**
      * POST /api/v1/tasks
@@ -88,5 +92,41 @@ public class TaskController {
     ) {
         taskService.deleteTask(id, currentUser);
         return ResponseEntity.noContent().build();
+    }
+
+    // --- Comment Endpoints ---
+
+    /**
+     * POST /api/v1/tasks/{id}/comments
+     * Adds a comment to the specified task.
+     */
+    @PostMapping("/{id}/comments")
+    public ResponseEntity<CommentDto> addComment(
+        @PathVariable Long id,
+        @Valid @RequestBody CreateCommentRequest request,
+        @AuthenticationPrincipal User currentUser
+    ) {
+        CommentDto comment = commentService.addCommentToTask(
+            id,
+            request,
+            currentUser
+        );
+        return new ResponseEntity<>(comment, HttpStatus.CREATED);
+    }
+
+    /**
+     * GET /api/v1/tasks/{id}/comments
+     * Lists all comments for the specified task.
+     */
+    @GetMapping("/{id}/comments")
+    public ResponseEntity<List<CommentDto>> getComments(
+        @PathVariable Long id,
+        @AuthenticationPrincipal User currentUser
+    ) {
+        List<CommentDto> comments = commentService.getCommentsForTask(
+            id,
+            currentUser
+        );
+        return ResponseEntity.ok(comments);
     }
 }

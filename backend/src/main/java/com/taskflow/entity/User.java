@@ -7,6 +7,8 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -66,6 +68,32 @@ public class User implements UserDetails {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    // --- Relationships ---
+
+    // Teams this user is a member of (via UserTeam entity)
+    @OneToMany(
+        mappedBy = "user",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
+    )
+    private Set<UserTeam> teams = new HashSet<>();
+
+    // Tasks this user is assigned to
+    @ManyToMany(mappedBy = "assignees", fetch = FetchType.LAZY)
+    private Set<Task> assignedTasks = new HashSet<>();
+
+    // Comments this user has made
+    @OneToMany(
+        mappedBy = "user",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
+    )
+    private Set<Comment> comments = new HashSet<>();
+
+    // Tasks this user has created
+    @OneToMany(mappedBy = "createdBy", cascade = CascadeType.ALL)
+    private Set<Task> createdTasks = new HashSet<>();
 
     // --- UserDetails Methods ---
     // We will enhance this in later steps when we add Roles

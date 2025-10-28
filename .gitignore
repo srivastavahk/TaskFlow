@@ -27,6 +27,7 @@ backend/.mvn/timing.properties
 backend/.mvn/wrapper/maven-wrapper.jar
 
 # IDE
+.vscode/
 .idea/
 *.iml
 *.ipr

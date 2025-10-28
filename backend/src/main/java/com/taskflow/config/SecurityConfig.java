@@ -76,8 +76,14 @@ public class SecurityConfig {
             .authorizeHttpRequests(authorize ->
                 authorize
                     // Publicly accessible endpoints
-                    .requestMatchers("/api/v1/auth/**")
+                    .requestMatchers(
+                        org.springframework.http.HttpMethod.POST,
+                        "/api/v1/auth/register",
+                        "/api/v1/auth/login"
+                    )
                     .permitAll()
+                    // Password reset endpoints to be added later
+                    // .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/v1/auth/password-reset/**").permitAll()
                     // OpenAPI/Swagger UI endpoints
                     .requestMatchers(
                         "/swagger-ui.html",

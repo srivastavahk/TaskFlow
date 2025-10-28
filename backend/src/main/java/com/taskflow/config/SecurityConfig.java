@@ -16,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -32,6 +33,7 @@ public class SecurityConfig {
 
     // We will inject the UserDetailsService implementation from the next file
     private final UserDetailsService userDetailsService;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     /**
      * Defines the PasswordEncoder bean (BCrypt).
@@ -74,8 +76,14 @@ public class SecurityConfig {
             .authorizeHttpRequests(authorize ->
                 authorize
                     // Publicly accessible endpoints
-                    .requestMatchers("/api/v1/auth/**")
+                    .requestMatchers(
+                        org.springframework.http.HttpMethod.POST,
+                        "/api/v1/auth/register",
+                        "/api/v1/auth/login"
+                    )
                     .permitAll()
+                    // Password reset endpoints to be added later
+                    // .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/v1/auth/password-reset/**").permitAll()
                     // OpenAPI/Swagger UI endpoints
                     .requestMatchers(
                         "/swagger-ui.html",
@@ -88,9 +96,13 @@ public class SecurityConfig {
                     .authenticated()
             )
             // 5. Tell Spring Security how to load user details
-            .userDetailsService(userDetailsService);
-
-        // In Step 7, we will add our JwtAuthenticationFilter here, before the default username/password filter.
+            .userDetailsService(userDetailsService)
+            // 6. Add our custom JWT filter
+            // We add it BEFORE the standard UsernamePasswordAuthenticationFilter
+            .addFilterBefore(
+                jwtAuthenticationFilter,
+                UsernamePasswordAuthenticationFilter.class
+            );
 
         return http.build();
     }

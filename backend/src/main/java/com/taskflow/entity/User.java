@@ -11,8 +11,10 @@ import java.util.HashSet;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
@@ -22,7 +24,9 @@ import org.springframework.security.core.userdetails.UserDetails;
  * Represents the User entity
  * Implements UserDetails for Spring Security integration
  */
-@Data // Lombok: Generates getters, setters, toString, equals, hashCode
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder // Lombok: Provides a builder pattern
 @NoArgsConstructor // Lombok: Required for JPA
 @AllArgsConstructor // Lombok: Useful for builder
@@ -36,6 +40,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class User implements UserDetails {
 
     @Id
+    @EqualsAndHashCode.Include
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long id;

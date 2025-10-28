@@ -4,6 +4,7 @@ import com.taskflow.dto.CreateTaskRequest;
 import com.taskflow.dto.TaskDto;
 import com.taskflow.dto.UpdateTaskRequest;
 import com.taskflow.dto.UserDto;
+import com.taskflow.entity.NotificationType;
 import com.taskflow.entity.Task;
 import com.taskflow.entity.Team;
 import com.taskflow.entity.User;
@@ -16,6 +17,7 @@ import com.taskflow.repository.UserRepository;
 import com.taskflow.repository.UserTeamRepository;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +33,7 @@ public class TaskService {
     private final UserRepository userRepository;
     private final UserTeamRepository userTeamRepository;
     private final CommentRepository commentRepository;
+    private final NotificationService notificationService;
 
     /**
      * Creates a new task.
@@ -132,9 +135,6 @@ public class TaskService {
         if (request.getDescription() != null) {
             task.setDescription(request.getDescription());
         }
-        if (request.getStatus() != null) {
-            task.setStatus(request.getStatus());
-        }
         if (request.getPriority() != null) {
             task.setPriority(request.getPriority());
         }
@@ -144,12 +144,67 @@ public class TaskService {
         if (request.getArchived() != null) {
             task.setArchived(request.getArchived());
         }
+
+        // --- Notification Logic ---
+        // 2. Check if assignees are being changed
         if (request.getAssigneeIds() != null) {
-            Set<User> assignees = new HashSet<>(
+            Set<Long> oldAssigneeIds = task
+                .getAssignees()
+                .stream()
+                .map(User::getId)
+                .collect(Collectors.toSet());
+
+            Set<User> newAssignees = new HashSet<>(
                 userRepository.findAllById(request.getAssigneeIds())
             );
-            task.setAssignees(assignees);
+
+            // Find newly added assignees
+            Set<User> addedAssignees = newAssignees
+                .stream()
+                .filter(assignee -> !oldAssigneeIds.contains(assignee.getId()))
+                .collect(Collectors.toSet());
+
+            if (!addedAssignees.isEmpty()) {
+                notificationService.createNotifications(
+                    addedAssignees,
+                    task,
+                    NotificationType.TASK_ASSIGNED,
+                    user.getName() +
+                        " assigned you to the task: " +
+                        task.getTitle()
+                );
+            }
+            task.setAssignees(newAssignees);
         }
+
+        // 3. Check if status is changing
+        if (
+            request.getStatus() != null &&
+            !Objects.equals(task.getStatus(), request.getStatus())
+        ) {
+            // Notify assignees (and creator?) about status change
+            String statusMessage =
+                user.getName() +
+                " changed the status of '" +
+                task.getTitle() +
+                "' to " +
+                request.getStatus();
+
+            // Notify all current assignees + creator
+            Set<User> toNotify = new HashSet<>(task.getAssignees());
+            toNotify.add(task.getCreatedBy());
+            toNotify.remove(user); // Don't notify the user who made the change
+
+            notificationService.createNotifications(
+                toNotify,
+                task,
+                NotificationType.TASK_STATUS_CHANGED,
+                statusMessage
+            );
+            task.setStatus(request.getStatus());
+        }
+
+        // --- End Notification Logic ---
 
         Task updatedTask = taskRepository.save(task);
         return mapTaskToDto(updatedTask);

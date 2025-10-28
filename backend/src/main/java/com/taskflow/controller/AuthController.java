@@ -9,6 +9,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,5 +58,17 @@ public class AuthController {
     ) {
         LoginResponse loginResponse = authService.login(loginRequest);
         return ResponseEntity.ok(loginResponse);
+    }
+
+    /**
+     * A test endpoint to verify JWT authentication.
+     * It's secured because it's not under /api/v1/auth/**
+     */
+    @GetMapping("/me")
+    public ResponseEntity<String> getAuthenticatedUserEmail(
+        @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        // @AuthenticationPrincipal injects the UserDetails object we set in JwtAuthenticationFilter
+        return ResponseEntity.ok("Your email is: " + userDetails.getUsername());
     }
 }

@@ -1,5 +1,7 @@
 package com.taskflow.controller;
 
+import com.taskflow.dto.LoginRequest;
+import com.taskflow.dto.LoginResponse;
 import com.taskflow.dto.RegisterRequest;
 import com.taskflow.dto.UserDto;
 import com.taskflow.service.AuthService;
@@ -40,5 +42,18 @@ public class AuthController {
         return new ResponseEntity<>(registeredUser, HttpStatus.CREATED);
     }
 
-    // We will add the /login endpoint here in later
+    /**
+     * POST /api/v1/auth/login
+     * Endpoint for user login.
+     *
+     * @param loginRequest The request body containing email and password.
+     * @return A ResponseEntity with the LoginResponse (tokens) and HTTP status 200.
+     */
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> loginUser(
+        @Valid @RequestBody LoginRequest loginRequest
+    ) {
+        LoginResponse loginResponse = authService.login(loginRequest);
+        return ResponseEntity.ok(loginResponse);
+    }
 }

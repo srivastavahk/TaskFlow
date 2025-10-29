@@ -1,4 +1,5 @@
 gitignore
+scratchpad
 
 # Ignore any file with 'secret' or 'secrets' in its name (case-insensitive)
 **/*[Ss]ecret*
@@ -46,7 +47,7 @@ Thumbs.db
 logs/
 *.log
 
-# Secrets (PRD Sec 6.2)
+# Secrets
 backend/src/main/resources/application-*.yml
 !backend/src/main/resources/application.yml
 !backend/src/main/resources/application-dev.yml.example

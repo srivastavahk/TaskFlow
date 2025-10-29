@@ -7,10 +7,14 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
@@ -20,7 +24,9 @@ import org.springframework.security.core.userdetails.UserDetails;
  * Represents the User entity
  * Implements UserDetails for Spring Security integration
  */
-@Data // Lombok: Generates getters, setters, toString, equals, hashCode
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder // Lombok: Provides a builder pattern
 @NoArgsConstructor // Lombok: Required for JPA
 @AllArgsConstructor // Lombok: Useful for builder
@@ -34,6 +40,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class User implements UserDetails {
 
     @Id
+    @EqualsAndHashCode.Include
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long id;
@@ -66,6 +73,32 @@ public class User implements UserDetails {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    // --- Relationships ---
+
+    // Teams this user is a member of (via UserTeam entity)
+    @OneToMany(
+        mappedBy = "user",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
+    )
+    private Set<UserTeam> teams = new HashSet<>();
+
+    // Tasks this user is assigned to
+    @ManyToMany(mappedBy = "assignees", fetch = FetchType.LAZY)
+    private Set<Task> assignedTasks = new HashSet<>();
+
+    // Comments this user has made
+    @OneToMany(
+        mappedBy = "user",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
+    )
+    private Set<Comment> comments = new HashSet<>();
+
+    // Tasks this user has created
+    @OneToMany(mappedBy = "createdBy", cascade = CascadeType.ALL)
+    private Set<Task> createdTasks = new HashSet<>();
 
     // --- UserDetails Methods ---
     // We will enhance this in later steps when we add Roles
